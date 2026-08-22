@@ -1,8 +1,16 @@
 # 礼国猜歌会 Demo
 
-Static export mirrored from `https://liguo-listening-demo.vercel.app/` on 2026-08-22.
+一个可直接公开访问的静态网页游戏 Demo，内容来自线上版本 `https://liguo-listening-demo.vercel.app/`，并已整理为 GitHub Pages / Netlify 都能发布的静态站点。
 
-## Netlify
+## Public Access
+
+GitHub Pages:
+
+```text
+https://clevemessage.github.io/ILLIT-s-Song-meeting/
+```
+
+## Netlify Optional
 
 - Build command: leave empty
 - Publish directory: `.`
