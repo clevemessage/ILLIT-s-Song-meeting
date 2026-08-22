@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>礼国猜歌会 Demo</title>
+    <link rel="stylesheet" href="./styles.css?v=20260727-clip-audio2" />
+  </head>
+  <body class="splash-active">
+    <div class="splash-intro" id="splashIntro" aria-live="polite">
+      <button class="splash-enter" id="splashEnter" type="button" disabled aria-label="进入 ILLIT 世界">
+        <span class="splash-logo" aria-hidden="true">
+          <span class="splash-logo-layer splash-logo-layer--base">
+            <span class="splash-block splash-b1"></span>
+            <span class="splash-block splash-b2"></span>
+            <span class="splash-block splash-b3"></span>
+            <span class="splash-block splash-b4"></span>
+            <span class="splash-block splash-b5"></span>
+            <span class="splash-block splash-b6"></span>
+            <span class="splash-block splash-b7"></span>
+            <span class="splash-block splash-b8"></span>
+          </span>
+          <span class="splash-progress" id="splashProgress">
+            <span class="splash-logo-layer splash-logo-layer--progress">
+              <span class="splash-block splash-b1"></span>
+              <span class="splash-block splash-b2"></span>
+              <span class="splash-block splash-b3"></span>
+              <span class="splash-block splash-b4"></span>
+              <span class="splash-block splash-b5"></span>
+              <span class="splash-block splash-b6"></span>
+              <span class="splash-block splash-b7"></span>
+              <span class="splash-block splash-b8"></span>
+            </span>
+          </span>
+        </span>
+        <span class="splash-text" id="splashText">进入ILLIT世界中...</span>
+      </button>
+    </div>
+    <main class="app-shell">
+      <section class="phone" aria-label="礼国听歌会游戏 Demo">
+        <div class="sky"></div>
+
+        <section class="screen screen-home active" data-screen="home">
+          <div class="stage-lights"></div>
+          <button class="home-share-top" type="button" aria-label="分享游戏">
+            <img src="./assets/home_share_top.png" alt="" />
+          </button>
+          <div class="home-brand">
+            <img class="home-title-img" src="./assets/home_title_illit.png?v=20260720-mainlogo1" alt="Illit's song meeting" />
+          </div>
+          <div class="mascot-band" aria-hidden="true">
+            <img src="./assets/char01_front.png" alt="" />
+            <img src="./assets/char02_front.png" alt="" />
+            <img src="./assets/char03_front.png" alt="" />
+            <img src="./assets/char04_front.png" alt="" />
+            <img src="./assets/char05_front.png" alt="" />
+          </div>
+          <button class="home-image-button start-game" type="button" aria-label="开始挑战">
+            <img src="./assets/home_btn_start.png" alt="" />
+          </button>
+          <button class="home-image-button open-rank" type="button" aria-label="今日真粉榜">
+            <img src="./assets/home_btn_rank.png" alt="" />
+          </button>
+          <img class="home-footer-logo" src="./assets/home_footer_logo.png" alt="ILLIT" />
+        </section>
+
+        <section class="screen screen-game" data-screen="game">
+          <header class="game-hud">
+            <button class="hud-btn hud-back to-home" type="button" aria-label="返回首页"></button>
+            <div class="hud-level"><span class="hud-level-text" id="levelPill">第 1/5 关</span></div>
+            <div class="hud-hearts" id="hearts">
+              <div class="hud-heart-slot" data-slot="0"><img class="hud-heart-img" src="./assets/hud_heart_1.png" alt="" /></div>
+              <div class="hud-heart-slot" data-slot="1"><img class="hud-heart-img" src="./assets/hud_heart_2.png" alt="" /></div>
+              <div class="hud-heart-slot" data-slot="2"><img class="hud-heart-img" src="./assets/hud_heart_3.png" alt="" /></div>
+            </div>
+            <button class="hud-btn hud-pause pause-btn" type="button" aria-label="暂停">
+              <img class="pause-icon pause-icon--pause" src="./assets/hud_btn_pause.png" alt="" />
+              <img class="pause-icon pause-icon--play" src="./assets/hud_btn_play.png" alt="" />
+            </button>
+            <button class="hud-btn hud-rule" id="ruleBtn" type="button" aria-label="规则"></button>
+          </header>
+
+          <div class="game-stats" id="gameStats" aria-label="本局数据">
+            <img class="stats-bg" src="./assets/alarm_clock.png" alt="" aria-hidden="true" />
+            <span class="stats-time" id="statsTime">00:00</span>
+          </div>
+
+          <div class="playfield" id="playfield" aria-label="试听角色区"></div>
+
+          <div class="target-zone" id="targetZone">
+            <img class="target-glow" src="./assets/target_glow.png" alt="" />
+            <button class="wand-play" id="targetPlay" type="button" aria-label="播放目标片段">
+              <img id="targetWand" src="./assets/wand_off.png" alt="" />
+            </button>
+            <div class="target-copy">
+              <span id="targetHint">任务：GILLIT，请找出正确哼唱这首歌的娃娃，把它拖动到应援棒身边！</span>
+              <button class="mini-replay" id="replayBtn" type="button" aria-label="重播唱段">重播唱段</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="screen screen-result" data-screen="result">
+          <div class="result-panel">
+            <img class="result-title-img" src="./assets/result_title_correct.png?v=20260720-result-title2" alt="抓对了！" />
+            <div class="album-card-new">
+              <div class="album-card-bg"></div>
+              <div class="album-art-new">
+                <img class="album-art-img" id="resultAlbumArt" src="./assets/album_super_real_me.jpg" alt="专辑封面" />
+              </div>
+              <div class="album-card-text">
+                <strong id="resultSong">Song Title</strong>
+                <span id="resultMeta">礼国猜歌会</span>
+              </div>
+              <button class="result-play-btn" id="resultPlayBtn" type="button" aria-label="播放/暂停" data-state="play">
+                <img class="result-play-img" id="resultPlayImg" src="./assets/btn_play.png" alt="播放" />
+              </button>
+            </div>
+            <div class="result-mascots">
+              <img src="./assets/char01_front.png" alt="" />
+              <img src="./assets/char04_front.png" alt="" />
+            </div>
+            <button class="primary next-level" type="button"><img src="./assets/btn_next.png" alt="下一关" /></button>
+            <button class="secondary listen-full" type="button"><img src="./assets/btn_listen.png" alt="听完整版" /></button>
+            <button class="plain open-share" type="button"><img src="./assets/btn_share.png" alt="分享成绩" /></button>
+          </div>
+        </section>
+
+        <section class="screen screen-fail" data-screen="fail">
+          <div class="fail-panel">
+            <img class="fail-title-img" src="./assets/fail_title.png?v=20260722-fail-title1" alt="挑战失败" />
+            <img class="sad-mascot" src="./assets/char01_front.png" alt="" />
+            <p id="failCopy">再听一次，差一点就抓到了！</p>
+            <button class="retry-btn" type="button" aria-label="重新挑战">
+              <img src="./assets/btn_retry.png" alt="重新挑战" />
+            </button>
+            <button class="revive-btn" type="button" aria-label="看广告复活">
+              <img src="./assets/btn_revive.png" alt="看广告复活" />
+            </button>
+            <button class="fail-home to-home" type="button" aria-label="返回首页">
+              <img src="./assets/btn_home.png" alt="返回首页" />
+            </button>
+          </div>
+        </section>
+
+        <section class="screen screen-rank" data-screen="rank">
+          <div class="rank-panel">
+            <div class="rank-header">
+              <button class="rank-back to-home" type="button" aria-label="返回首页">
+                <img src="./assets/btn_back_pink.png" alt="" />
+              </button>
+              <img class="rank-title-img" src="./assets/rank_title.png" alt="今日真粉榜" />
+            </div>
+            <ol class="rank-list" id="rankList"></ol>
+            <button class="rank-btn rank-continue start-game" type="button" aria-label="继续挑战">
+              <img src="./assets/btn_continue.png" alt="继续挑战" />
+            </button>
+            <button class="rank-btn rank-share open-share" type="button" aria-label="分享榜单">
+              <img src="./assets/btn_share_rank.png" alt="分享榜单" />
+            </button>
+          </div>
+        </section>
+
+        <section class="screen screen-share" data-screen="share">
+          <div class="share-card">
+            <img class="share-title-img" src="./assets/share_title_illit.png?v=20260720-mainlogo1" alt="ILLIT's Song Meeting" />
+            <div class="share-rank" id="shareRank">我已通过第 1 关</div>
+            <div class="mascot-band small" aria-hidden="true">
+              <img src="./assets/char01_front.png" alt="" />
+              <img src="./assets/char04_front.png" alt="" />
+            </div>
+            <button class="primary share-return" type="button">继续游戏</button>
+            <button class="plain to-home" type="button">返回首页</button>
+          </div>
+        </section>
+
+        <!-- 游戏中返回确认弹窗 -->
+        <div class="modal-mask" id="exitModal" hidden>
+          <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="exitModalTitle">
+            <h2 id="exitModalTitle">你确认要退出当前歌会游戏吗？</h2>
+            <p class="modal-hint">退出后当前关卡进度将不会保存</p>
+            <div class="modal-actions">
+              <button class="modal-btn modal-btn--cancel" type="button" data-action="cancel" aria-label="取消">
+                <img src="./assets/btn_exit_cancel.png" alt="取消" />
+              </button>
+              <button class="modal-btn modal-btn--confirm" type="button" data-action="confirm" aria-label="确认退出">
+                <img src="./assets/btn_exit_confirm.png" alt="确认退出" />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 规则弹窗：临时复用挽留弹窗背景图 -->
+        <div class="modal-mask" id="ruleModal" hidden>
+          <div class="modal-card rule-modal-card" role="dialog" aria-modal="true" aria-labelledby="ruleModalTitle">
+            <h2 id="ruleModalTitle">游戏规则</h2>
+            <p class="modal-hint">先听目标唱段，再点击娃娃试听，把唱同一首歌的娃娃拖到应援棒旁边。</p>
+            <div class="rule-carousel" id="ruleCarousel" aria-label="游戏规则步骤图">
+              <button class="rule-arrow rule-arrow--prev" type="button" data-rule-prev aria-label="上一张规则图"></button>
+              <div class="rule-slide-window">
+                <img id="ruleSlideImage" src="./assets/rule_slide_01.png?v=20260720-rule-clean1" alt="规则 1：听原声" />
+              </div>
+              <button class="rule-arrow rule-arrow--next" type="button" data-rule-next aria-label="下一张规则图"></button>
+              <div class="rule-dots" aria-hidden="true">
+                <span class="active"></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+            <p class="modal-hint">答错会扣除爱心，爱心用完挑战失败。</p>
+            <div class="modal-actions">
+              <button class="modal-btn modal-btn--cancel" type="button" data-action="rule-close" aria-label="知道了">
+                <img src="./assets/btn_exit_cancel.png" alt="知道了" />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 首页分享弹窗：分享回流卡片 -->
+        <div class="modal-mask share-game-mask" id="homeShareModal" hidden>
+          <div class="modal-card share-game-card" role="dialog" aria-modal="true" aria-labelledby="homeShareTitle">
+            <h2 id="homeShareTitle" class="sr-only">分享歌会挑战</h2>
+            <div class="share-game-preview" aria-label="分享歌会挑战">
+              <div class="share-modal-head" aria-hidden="true">
+                <div class="share-modal-title">分享歌会挑战</div>
+              </div>
+              <img class="share-preview-logo" src="./assets/share_title_illit.png?v=20260720-mainlogo1" alt="ILLIT's Song Meeting" />
+              <div class="share-preview-progress" id="homeShareProgress">是ILLIT粉丝就来和我一起玩！</div>
+              <div class="share-preview-mascots" aria-label="互动娃娃">
+                <button class="share-mascot-btn" type="button" aria-label="点击白兔娃娃冒爱心">
+                  <img src="./assets/char02_front.png" alt="" />
+                </button>
+                <button class="share-mascot-btn" type="button" aria-label="点击紫裙小熊冒爱心">
+                  <img src="./assets/char03_front.png" alt="" />
+                </button>
+                <button class="share-mascot-btn" type="button" aria-label="点击白虎娃娃冒爱心">
+                  <img src="./assets/char05_front.png" alt="" />
+                </button>
+              </div>
+              <div class="share-preview-footer">
+                <div class="share-preview-copy">
+                  <strong>扫一扫一起玩！</strong>
+                  <span>玩ILLIT‘s Song Meeting，解锁ILLIT专属游戏勋章～</span>
+                </div>
+              </div>
+            </div>
+            <div class="modal-actions share-game-actions">
+              <button class="modal-btn modal-btn--cancel" type="button" data-action="share-close" aria-label="关闭">
+                <img src="./assets/btn_exit_cancel.png" alt="关闭" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <aside class="preview-rail" aria-label="sprite sheet 页面预览">
+        <img src="./assets/page_home.png?v=20260723-preview-sync2" alt="首页 sprite 预览" loading="lazy" decoding="async" />
+        <img src="./assets/page_game.png?v=20260723-preview-sync2" alt="游戏页 sprite 预览" loading="lazy" decoding="async" />
+        <img src="./assets/page_success.png?v=20260723-preview-sync2" alt="抓对了页 sprite 预览" loading="lazy" decoding="async" />
+        <img src="./assets/page_fail.png?v=20260723-preview-sync2" alt="失败页 sprite 预览" loading="lazy" decoding="async" />
+        <img src="./assets/page_rank.png?v=20260723-preview-sync2" alt="排行榜页 sprite 预览" loading="lazy" decoding="async" />
+        <img src="./assets/page_share.png?v=20260723-preview-sync2" alt="分享页 sprite 预览" loading="lazy" decoding="async" />
+      </aside>
+    </main>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <script src="./game-utils.js?v=20260722-preview-sync1"></script>
+    <script src="./audio-config.js?v=20260727-clip-audio2"></script>
+    <script src="./app.js?v=20260727-clip-audio2"></script>
+  </body>
+</html>
