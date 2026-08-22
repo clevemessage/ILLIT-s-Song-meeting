@@ -251,7 +251,7 @@ body.splash-active:not(.splash-entering) .app-shell {
   font-weight: 400;
   letter-spacing: clamp(8px, 1.2vw, 12px);
   text-indent: clamp(8px, 1.2vw, 12px);
-  transform: translateX(-10px);
+  transform: translateX(-25px);
   animation: splashReadyPulse 1.35s ease-in-out infinite;
 }
 
