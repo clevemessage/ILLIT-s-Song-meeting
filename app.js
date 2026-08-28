@@ -34,7 +34,7 @@ const uiAudio = {
   bgm: new Audio("./assets/audio/ui/bgm.mp3"),
   success: new Audio("./assets/audio/ui/success.mp3"),
   wrong: new Audio("./assets/audio/ui/wrong.mp3"),
-  fail: new Audio("./assets/audio/ui/fail.wav"),
+  fail: new Audio("./assets/audio/ui/fail_wonhee.mp3"),
 };
 uiAudio.bgm.loop = true;
 Object.values(uiAudio).forEach((audio) => {
@@ -46,7 +46,7 @@ uiAudio.bgm.volume = 0.58;
 uiAudio.button.volume = 0.42;
 uiAudio.success.volume = 0.86;
 uiAudio.wrong.volume = 0.9;
-uiAudio.fail.volume = 0.92;
+uiAudio.fail.volume = 1;
 
 const mediaClipCache = new Map();
 const decodedClipCache = new Map();
@@ -115,11 +115,11 @@ const songs = GameAudioConfig.songs;
 const clips = GameAudioConfig.clips || [];
 
 const levelConfigs = [
-  { candidates: 10, duration: 1.5, targetClipId: "level1", correctSongId: "magnetic", correctClipId: "magnetic-vocal-01", instrumentalRatio: 0 },
-  { candidates: 11, duration: 1.5, targetClipId: "level2", correctSongId: "iconic-by-mistake", correctClipId: "iconic-by-mistake-vocal-02", instrumentalRatio: 0 },
-  { candidates: 12, duration: 1.5, targetClipId: "level3", correctSongId: "toki-yo-tomare", correctClipId: "toki-yo-tomare-instrumental-02", instrumentalRatio: 0.5 },
-  { candidates: 12, duration: 1.5, targetClipId: "level4", correctSongId: "iykyk", correctClipId: "iykyk-instrumental-02", instrumentalRatio: 0.75 },
-  { candidates: 13, duration: 1.5, targetClipId: "level5", correctSongId: "not-cute-anymore", correctClipId: "not-cute-anymore-instrumental-02", instrumentalRatio: 0.75 },
+  { candidates: 10, duration: 1.5, targetClipId: "level1", correctSongId: "magnetic", correctClipId: "magnetic-vocal-01", correctCount: 3, instrumentalRatio: 0 },
+  { candidates: 11, duration: 1.5, targetClipId: "level2", correctSongId: "iconic-by-mistake", correctClipId: "iconic-by-mistake-vocal-02", correctCount: 2, instrumentalRatio: 0 },
+  { candidates: 12, duration: 1.5, targetClipId: "level3", correctSongId: "toki-yo-tomare", correctClipId: "toki-yo-tomare-instrumental-02", correctCount: 1, instrumentalRatio: 0.5 },
+  { candidates: 12, duration: 1.5, targetClipId: "level4", correctSongId: "iykyk", correctClipId: "iykyk-instrumental-02", correctCount: 1, instrumentalRatio: 0.75 },
+  { candidates: 13, duration: 1.5, targetClipId: "level5", correctSongId: "not-cute-anymore", correctClipId: "not-cute-anymore-instrumental-02", correctCount: 1, instrumentalRatio: 0.75 },
 ];
 
 let state = {
@@ -429,12 +429,18 @@ function buildCandidates(config, count) {
   const clipPool = clips;
   const correctClip = clipPool.find((clip) => clip.id === config.correctClipId)
     || clipPool.find((clip) => clip.songId === config.correctSongId);
+  const requestedCorrectCount = Math.max(1, config.correctCount || 1);
   const usedIds = new Set();
   const selected = [];
   if (correctClip) {
     selected.push({ ...correctClip, isCorrect: true });
     usedIds.add(correctClip.id);
   }
+  selected.push(...takeUniqueClips(
+    clipPool.filter((clip) => clip.songId === config.correctSongId),
+    requestedCorrectCount - selected.length,
+    usedIds,
+  ).map((clip) => ({ ...clip, isCorrect: true })));
 
   const targetInstrumentalCount = Math.round(count * (config.instrumentalRatio || 0));
   const currentInstrumentalCount = selected.filter((clip) => clip.clipType === "instrumental").length;
@@ -465,10 +471,7 @@ function buildCandidates(config, count) {
 
   const uniqueSelected = selected.slice(0, count);
   const correctCount = uniqueSelected.filter((clip) => clip.isCorrect).length;
-  if (correctCount > 1) {
-    return shuffle(uniqueSelected.filter((clip, index) => !clip.isCorrect || index === uniqueSelected.findIndex((item) => item.isCorrect)));
-  }
-  if (uniqueSelected.length < count || correctCount !== 1) {
+  if (uniqueSelected.length < count || correctCount !== requestedCorrectCount) {
     console.warn("候选池不足，当前关卡未达到完整难度配置", { level: state.level + 1, count, uniqueSelected, correctCount });
   }
   return shuffle(uniqueSelected);
