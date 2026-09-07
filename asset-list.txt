@@ -84,6 +84,7 @@ assets/audio/songs/toki_yo_tomare.mp3
 assets/audio/ui/bgm.mp3
 assets/audio/ui/button.wav
 assets/audio/ui/fail.wav
+assets/audio/ui/fail_extra.mp3
 assets/audio/ui/fail_wonhee.mp3
 assets/audio/ui/success.mp3
 assets/audio/ui/wrong.mp3

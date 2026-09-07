@@ -35,6 +35,7 @@ const uiAudio = {
   success: new Audio("./assets/audio/ui/success.mp3"),
   wrong: new Audio("./assets/audio/ui/wrong.mp3"),
   fail: new Audio("./assets/audio/ui/fail_wonhee.mp3"),
+  failExtra: new Audio("./assets/audio/ui/fail_extra.mp3"),
 };
 uiAudio.bgm.loop = true;
 Object.values(uiAudio).forEach((audio) => {
@@ -42,11 +43,15 @@ Object.values(uiAudio).forEach((audio) => {
   audio.playsInline = true;
   audio.setAttribute?.("playsinline", "");
 });
-uiAudio.bgm.volume = 0.58;
+const HOME_BGM_VOLUME = 0.58;
+const GAME_BGM_VOLUME = 0.24;
+
+uiAudio.bgm.volume = HOME_BGM_VOLUME;
 uiAudio.button.volume = 0.42;
 uiAudio.success.volume = 0.86;
 uiAudio.wrong.volume = 0.9;
 uiAudio.fail.volume = 1;
+uiAudio.failExtra.volume = 1;
 
 const mediaClipCache = new Map();
 const decodedClipCache = new Map();
@@ -149,6 +154,7 @@ let movementFrame = 0;
 let lastMoveAt = 0;
 let statsTimer = 0;
 let resultPlaying = false;
+let resultPlaybackTimer = 0;
 let ruleModalWasPaused = false;
 let ruleSlideIndex = 0;
 let ruleSwipeStartX = 0;
@@ -277,25 +283,7 @@ function preloadMediaClip(src) {
 
 function preloadDecodedMediaClip(src) {
   if (!src || !/^https?:|^\.\//.test(src)) return null;
-  const absoluteSrc = new URL(src, window.location.href).href;
-  if (decodedClipCache.has(absoluteSrc)) return Promise.resolve(decodedClipCache.get(absoluteSrc));
-  if (decodingClipPromises.has(absoluteSrc)) return decodingClipPromises.get(absoluteSrc);
-  const promise = fetch(absoluteSrc, { cache: "force-cache" })
-    .then((response) => {
-      if (!response.ok) throw new Error(`Audio fetch failed: ${response.status}`);
-      return response.arrayBuffer();
-    })
-    .then((buffer) => ensureAudio().decodeAudioData(buffer))
-    .then((decoded) => {
-      decodedClipCache.set(absoluteSrc, decoded);
-      return decoded;
-    })
-    .catch(() => null)
-    .finally(() => {
-      decodingClipPromises.delete(absoluteSrc);
-    });
-  decodingClipPromises.set(absoluteSrc, promise);
-  return promise;
+  return null;
 }
 
 function preloadLevelAudio() {
@@ -322,6 +310,7 @@ function showScreen(name) {
     screen.classList.toggle("active", screen.dataset.screen === name);
   });
   if (name === "home") startHomeBgm();
+  else if (name === "game") startGameBgm();
   else stopHomeBgm();
   if (name === "game") {
     startMovementLoop();
@@ -341,6 +330,7 @@ function showScreen(name) {
   }
   if (name === "rank") renderRank();
   if (name === "share") updateShareProgress();
+  if (name !== "result") setResultPlaybackState(false);
   saveSession(name);
 }
 
@@ -356,8 +346,10 @@ function setGamePaused(paused, { toast = true } = {}) {
   if (paused) {
     stopMovementLoop();
     stopActiveSong();
+    stopHomeBgm(false);
   } else if (document.querySelector(".screen.active")?.dataset.screen === "game") {
     startMovementLoop();
+    startGameBgm();
   }
   if (toast) showToast(paused ? "Demo：游戏已暂停，点击继续按钮恢复" : "Demo：游戏已继续");
 }
@@ -928,13 +920,11 @@ function showResult() {
   // 设置专辑封面：优先使用 currentSong 的 albumArt，兜底用默认封面
   const cover = document.querySelector("#resultAlbumArt");
   if (cover) cover.src = state.currentSong.albumArt || "./assets/album_super_real_me.jpg";
-  // 重置 Play/Pause 按钮状态
-  if (resultPlayBtn) { resultPlayBtn.dataset.state = "play"; resultPlayBtn.classList.remove("is-playing"); }
-  if (resultPlayImg) resultPlayImg.src = "./assets/btn_play.png";
-  resultPlaying = false;
+  setResultPlaybackState(false);
   stopStatsTimer();
   stopActiveSong();
   showScreen("result");
+  playResultPreviewOnce();
 }
 
 function nextLevel() {
@@ -1044,8 +1034,9 @@ function stopUiAudio(audio, reset = true) {
   if (reset) audio.currentTime = 0;
 }
 
-function startHomeBgm() {
+function startHomeBgm(volume = HOME_BGM_VOLUME) {
   if (!uiAudio.bgm || !uiAudio.bgm.paused) return;
+  uiAudio.bgm.volume = volume;
   if (document.hidden) {
     homeBgmPending = true;
     setHomeBgmState("pending");
@@ -1069,16 +1060,22 @@ function startHomeBgm() {
   }
 }
 
-function stopHomeBgm() {
+function startGameBgm() {
+  if (!uiAudio.bgm) return;
+  uiAudio.bgm.volume = GAME_BGM_VOLUME;
+  startHomeBgm(GAME_BGM_VOLUME);
+}
+
+function stopHomeBgm(reset = true) {
   homeBgmPending = false;
   setHomeBgmState("stopped");
-  stopUiAudio(uiAudio.bgm);
+  stopUiAudio(uiAudio.bgm, reset);
 }
 
 function unlockHomeBgm() {
-  if (document.body.classList.contains("splash-active") && !document.body.classList.contains("splash-entering")) return;
   const activeScreen = document.querySelector(".screen.active")?.dataset.screen;
-  if (activeScreen === "home" && (homeBgmPending || uiAudio.bgm?.paused)) startHomeBgm();
+  if (activeScreen === "game" && (homeBgmPending || uiAudio.bgm?.paused)) startGameBgm();
+  else if (activeScreen === "home" && (homeBgmPending || uiAudio.bgm?.paused)) startHomeBgm();
 }
 
 function playButtonClickSfx() {
@@ -1250,6 +1247,7 @@ function playSong(song, durationFactor = 1, offset = 0) {
 }
 
 function stopActiveSong(audio = state.audio) {
+  clearResultPlaybackTimer();
   stopTargetWandVisual();
   if (state.mediaStopTimer) {
     clearTimeout(state.mediaStopTimer);
@@ -1299,6 +1297,7 @@ function stopActiveSong(audio = state.audio) {
 function playSuccess() {
   stopUiAudio(uiAudio.wrong);
   stopUiAudio(uiAudio.fail);
+  stopUiAudio(uiAudio.failExtra);
   const playback = playUiAudio(uiAudio.success, { catchErrors: false });
   if (playback && typeof playback.catch === "function") {
     playback.catch(() => playSuccessSynth());
@@ -1371,12 +1370,22 @@ function playWrong({ fatal = false } = {}) {
   stopActiveSong();
   stopUiAudio(uiAudio.button);
   stopUiAudio(uiAudio.success);
-  stopUiAudio(fatal ? uiAudio.wrong : uiAudio.fail);
-  if (fatal) stopUiAudio(uiAudio.bgm);
-  const playback = playUiAudio(fatal ? uiAudio.fail : uiAudio.wrong, { catchErrors: false });
-  if (playback && typeof playback.catch === "function") {
-    playback.catch(() => playWrongSynth());
-  } else if (!playback) {
+  stopUiAudio(uiAudio.wrong);
+  stopUiAudio(uiAudio.fail);
+  stopUiAudio(uiAudio.failExtra);
+  if (fatal) {
+    stopHomeBgm();
+    const primaryPlayback = playUiAudio(uiAudio.fail, { catchErrors: false });
+    const extraPlayback = playUiAudio(uiAudio.failExtra, { catchErrors: false });
+    const fallback = () => playWrongSynth();
+    if (primaryPlayback && typeof primaryPlayback.catch === "function") primaryPlayback.catch(fallback);
+    else if (!primaryPlayback && !extraPlayback) fallback();
+    if (extraPlayback && typeof extraPlayback.catch === "function") extraPlayback.catch(() => {});
+    return;
+  }
+  const playback = playUiAudio(uiAudio.wrong, { catchErrors: false });
+  if (playback && typeof playback.catch === "function") playback.catch(() => playWrongSynth());
+  else if (!playback) {
     playWrongSynth();
   }
 }
@@ -1606,6 +1615,7 @@ function enterFromSplash() {
 }
 
 async function initSplashIntro() {
+  startHomeBgm();
   if (!splashIntro || !splashEnter || !splashText) {
     startHomeBgm();
     return;
@@ -1662,34 +1672,40 @@ document.querySelector("#ruleBtn").addEventListener("click", () => {
   openRuleModal();
 });
 
+function clearResultPlaybackTimer() {
+  if (!resultPlaybackTimer) return;
+  clearTimeout(resultPlaybackTimer);
+  resultPlaybackTimer = 0;
+}
+
+function setResultPlaybackState(isPlaying) {
+  clearResultPlaybackTimer();
+  resultPlaying = isPlaying;
+  if (resultPlayBtn) {
+    resultPlayBtn.dataset.state = isPlaying ? "play" : "pause";
+    resultPlayBtn.classList.toggle("is-playing", isPlaying);
+  }
+  if (resultPlayImg) resultPlayImg.src = isPlaying ? "./assets/btn_pause.png" : "./assets/btn_play.png";
+}
+
+function playResultPreviewOnce() {
+  const duration = state.currentSong.fullDuration || 15;
+  const src = state.currentSong.fullSrc || GameAudioConfig.targetClip.src;
+  playMediaClip(src, duration);
+  setResultPlaybackState(true);
+  resultPlaybackTimer = window.setTimeout(() => {
+    setResultPlaybackState(false);
+  }, duration * 1000 + 200);
+}
+
 /* ── 成功页 Play/Pause 按钮 ── */
 if (resultPlayBtn) {
   resultPlayBtn.addEventListener("click", () => {
     if (resultPlaying) {
-      // 暂停
       stopActiveSong();
-      resultPlaying = false;
-      resultPlayBtn.dataset.state = "pause";
-      resultPlayBtn.classList.remove("is-playing");
-      if (resultPlayImg) resultPlayImg.src = "./assets/btn_play.png";
+      setResultPlaybackState(false);
     } else {
-      // 播放当前歌曲的完整片段
-      const duration = state.currentSong.fullDuration || 15;
-      const src = state.currentSong.fullSrc || GameAudioConfig.targetClip.src;
-      playMediaClip(src, duration);
-      resultPlaying = true;
-      resultPlayBtn.dataset.state = "play";
-      resultPlayBtn.classList.add("is-playing");
-      if (resultPlayImg) resultPlayImg.src = "./assets/btn_pause.png";
-      // 播放结束后自动恢复播放按钮
-      setTimeout(() => {
-        if (resultPlaying && resultPlayBtn) {
-          resultPlaying = false;
-          resultPlayBtn.dataset.state = "pause";
-          resultPlayBtn.classList.remove("is-playing");
-          if (resultPlayImg) resultPlayImg.src = "./assets/btn_play.png";
-        }
-      }, duration * 1000 + 200);
+      playResultPreviewOnce();
     }
   });
 }
@@ -1842,7 +1858,10 @@ document.addEventListener("visibilitychange", () => {
   }
   const activeScreen = document.querySelector(".screen.active")?.dataset.screen;
   const paused = document.querySelector(".hud-pause")?.classList.contains("is-paused");
-  if (activeScreen === "game" && !paused) startMovementLoop();
+  if (activeScreen === "game" && !paused) {
+    startMovementLoop();
+    startGameBgm();
+  }
   if (activeScreen === "home") startHomeBgm();
 });
 
