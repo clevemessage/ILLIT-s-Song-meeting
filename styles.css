@@ -1707,26 +1707,19 @@ body[data-skin="doll-v1"] .share-mascot-btn img {
     min-height: 100vh;
     min-height: 100dvh;
     min-height: 100svh;
-    padding:
-      max(var(--mobile-safe-gap), env(safe-area-inset-top))
-      max(var(--mobile-safe-gap), env(safe-area-inset-right))
-      max(var(--mobile-safe-gap), env(safe-area-inset-bottom))
-      max(var(--mobile-safe-gap), env(safe-area-inset-left));
+    margin: 0;
+    padding: 0;
   }
 
   .phone {
-    width: min(
-      calc(100vw - max(var(--mobile-safe-gap), env(safe-area-inset-left)) - max(var(--mobile-safe-gap), env(safe-area-inset-right))),
-      calc((100vh - max(var(--mobile-safe-gap), env(safe-area-inset-top)) - max(var(--mobile-safe-gap), env(safe-area-inset-bottom))) * 9 / 16),
-      calc((100dvh - max(var(--mobile-safe-gap), env(safe-area-inset-top)) - max(var(--mobile-safe-gap), env(safe-area-inset-bottom))) * 9 / 16),
-      calc((100svh - max(var(--mobile-safe-gap), env(safe-area-inset-top)) - max(var(--mobile-safe-gap), env(safe-area-inset-bottom))) * 9 / 16),
-      var(--phone-max-mobile)
-    );
-    max-height: calc(100vh - var(--mobile-safe-gap) * 2);
-    max-height: calc(100dvh - var(--mobile-safe-gap) * 2);
-    max-height: calc(100svh - var(--mobile-safe-gap) * 2);
-    margin: 0 auto;
-    border-radius: clamp(22px, 7.6cqw, 34px);
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    height: 100svh;
+    max-height: none;
+    margin: 0;
+    border-radius: 0;
+    box-shadow: none;
   }
 
   .screen {
