@@ -47,7 +47,7 @@ Object.values(uiAudio).forEach((audio) => {
   audio.setAttribute?.("playsinline", "");
 });
 const HOME_BGM_VOLUME = 0.58;
-const GAME_BGM_VOLUME = 0.15;
+const GAME_BGM_VOLUME = 0.09;
 
 uiAudio.bgm.volume = HOME_BGM_VOLUME;
 uiAudio.button.volume = 0.42;
@@ -1646,6 +1646,7 @@ function collectSplashImageAssets() {
 
 function collectDeferredImageAssets() {
   const assets = new Set();
+  assets.add("./assets/singing_bubble.png");
   document.querySelectorAll("img").forEach((img) => {
     if (img.closest(".preview-rail")) return;
     const src = img.getAttribute("src");
