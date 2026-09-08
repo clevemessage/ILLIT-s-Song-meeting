@@ -631,6 +631,7 @@ function renderCandidates(count) {
 
 function startDrag(event, button, mascot) {
   if (event.pointerType === "mouse" && event.button !== 0) return;
+  if (state.pendingDrag || state.dragging) cancelActiveDrag();
   if (isTouchPointerEvent(event) && event.cancelable) event.preventDefault();
   createDragGesture(event, button, mascot, event.pointerId);
   if (isTouchPointerEvent(event)) {
@@ -648,9 +649,11 @@ function startDrag(event, button, mascot) {
   button.addEventListener("pointermove", dragMove);
   button.addEventListener("pointerup", endDrag, { once: true });
   button.addEventListener("pointercancel", endDrag, { once: true });
+  button.addEventListener("lostpointercapture", cancelActiveDrag, { once: true });
   document.addEventListener("pointermove", dragMove);
   document.addEventListener("pointerup", endDrag, { once: true });
   document.addEventListener("pointercancel", endDrag, { once: true });
+  window.addEventListener("blur", cancelActiveDrag, { once: true });
 }
 
 function startMouseDrag(event, button, mascot) {
@@ -658,6 +661,7 @@ function startMouseDrag(event, button, mascot) {
   createDragGesture(event, button, mascot, "mouse");
   document.addEventListener("mousemove", mouseDragMove);
   document.addEventListener("mouseup", endMouseDrag, { once: true });
+  window.addEventListener("blur", cancelActiveDrag, { once: true });
 }
 
 function createDragGesture(event, button, mascot, pointerId) {
@@ -675,6 +679,7 @@ function createDragGesture(event, button, mascot, pointerId) {
     playfieldLeft: playfieldRect.left,
     playfieldTop: playfieldRect.top,
   };
+  state.pendingDrag.timeoutId = window.setTimeout(cancelActiveDrag, 8000);
 }
 
 function dragMove(event) {
@@ -715,12 +720,9 @@ function finishDrag(event, pointerId) {
   const drag = state.pendingDrag;
   if (!drag || drag.pointerId !== pointerId) return;
   const { button, mascot } = drag;
-  if (pointerId !== "mouse") button.releasePointerCapture?.(drag.pointerId);
-  button.removeEventListener("pointermove", dragMove);
-  button.removeEventListener("pointercancel", endDrag);
-  document.removeEventListener("pointermove", dragMove);
-  document.removeEventListener("pointercancel", endDrag);
-  document.removeEventListener("mousemove", mouseDragMove);
+  clearTimeout(drag.timeoutId);
+  removeDragListeners(button);
+  releasePointerCapture(button, drag.pointerId);
   button.classList.remove("dragging");
   targetZone.classList.remove("ready");
   state.pendingDrag = null;
@@ -753,6 +755,42 @@ function finishDrag(event, pointerId) {
   bindRunnerFrames(button, mascot, direction, button.frameIndex || 0);
   state.dragging = null;
   if (isDrop) judge(button.dataset.correct === "1");
+}
+
+function releasePointerCapture(button, pointerId) {
+  if (!button || pointerId === "mouse") return;
+  try {
+    button.releasePointerCapture?.(pointerId);
+  } catch {
+    // The browser may already have released capture after a canceled gesture.
+  }
+}
+
+function removeDragListeners(button) {
+  button?.removeEventListener("pointermove", dragMove);
+  button?.removeEventListener("pointerup", endDrag);
+  button?.removeEventListener("pointercancel", endDrag);
+  button?.removeEventListener("lostpointercapture", cancelActiveDrag);
+  document.removeEventListener("pointermove", dragMove);
+  document.removeEventListener("pointerup", endDrag);
+  document.removeEventListener("pointercancel", endDrag);
+  document.removeEventListener("mousemove", mouseDragMove);
+  document.removeEventListener("mouseup", endMouseDrag);
+  window.removeEventListener("blur", cancelActiveDrag);
+}
+
+function cancelActiveDrag() {
+  const drag = state.pendingDrag;
+  const button = drag?.button || state.dragging;
+  if (drag) {
+    releasePointerCapture(button, drag.pointerId);
+    clearTimeout(drag.timeoutId);
+    removeDragListeners(button);
+  }
+  button?.classList.remove("dragging");
+  targetZone.classList.remove("ready");
+  state.pendingDrag = null;
+  state.dragging = null;
 }
 
 function getCandidateForButton(button) {
