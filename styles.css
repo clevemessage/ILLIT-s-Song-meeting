@@ -422,13 +422,13 @@ body.splash-active:not(.splash-entering) .app-shell {
   width: 28px;
   height: 28px;
   padding: 0;
-  border: 1px solid rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.9);
   border-radius: 999px;
-  background: rgba(255, 221, 240, 0.58);
-  box-shadow: 0 3px 0 rgba(208, 116, 176, 0.26), 0 6px 10px rgba(122, 62, 118, 0.14);
+  background: rgba(255, 235, 248, 0.64);
+  box-shadow: 0 3px 0 rgba(233, 158, 207, 0.2), 0 6px 10px rgba(174, 103, 160, 0.12);
   cursor: pointer;
   transform: translateY(calc(-50% + 25px));
-  filter: drop-shadow(0 2px 3px rgba(86, 50, 118, 0.16));
+  filter: drop-shadow(0 2px 3px rgba(174, 103, 160, 0.14));
   transition: transform 0.15s ease, filter 0.15s ease;
 }
 
@@ -440,11 +440,11 @@ body.splash-active:not(.splash-entering) .app-shell {
 }
 
 .skin-arrow--prev {
-  left: -6px;
+  left: -34px;
 }
 
 .skin-arrow--next {
-  right: -6px;
+  right: -34px;
 }
 
 .skin-arrow::before {
@@ -453,8 +453,8 @@ body.splash-active:not(.splash-entering) .app-shell {
   width: 8px;
   height: 8px;
   margin: 0 auto;
-  border-top: 3px solid rgba(207, 70, 145, 0.92);
-  border-left: 3px solid rgba(207, 70, 145, 0.92);
+  border-top: 3px solid rgba(229, 112, 184, 0.94);
+  border-left: 3px solid rgba(229, 112, 184, 0.94);
 }
 
 .skin-arrow--prev::before {
@@ -467,7 +467,7 @@ body.splash-active:not(.splash-entering) .app-shell {
 
 .skin-arrow:active {
   transform: translateY(calc(-50% + 27px)) scale(0.96);
-  filter: drop-shadow(0 1px 2px rgba(86, 50, 118, 0.16)) brightness(1.04);
+  filter: drop-shadow(0 1px 2px rgba(174, 103, 160, 0.12)) brightness(1.04);
 }
 
 .mascot-band img {

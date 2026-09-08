@@ -68,13 +68,25 @@ const skinOptions = [
     id: "default",
     root: "./assets",
     version: ASSET_VERSION,
-    names: ["棕糖熊", "红结兔", "紫衣橙熊", "粉裙可可", "蓝结灰虎"],
+    characters: [
+      { id: "char01", name: "棕糖熊" },
+      { id: "char02", name: "红结兔" },
+      { id: "char03", name: "紫衣橙熊" },
+      { id: "char04", name: "粉裙可可" },
+      { id: "char05", name: "蓝结灰虎" },
+    ],
   },
   {
     id: "doll-v1",
     root: "./assets/skins/doll-v1",
     version: SKIN_ASSET_VERSION,
-    names: ["星麦金铃", "发卡栗栗", "粉桃夜帽", "蓝云团团", "蜜柚睡衣"],
+    characters: [
+      { id: "char03", name: "粉桃夜帽" },
+      { id: "char01", name: "星麦金铃" },
+      { id: "char04", name: "蓝云团团" },
+      { id: "char02", name: "发卡栗栗" },
+      { id: "char05", name: "蜜柚睡衣" },
+    ],
   },
 ];
 
@@ -107,13 +119,13 @@ function spriteSrcForSkin(skin, id, suffix) {
 
 function buildMascots(skinId = activeSkinId) {
   const skin = findSkinOption(skinId);
-  return Array.from({ length: 5 }, (_, index) => {
-    const id = `char${String(index + 1).padStart(2, "0")}`;
+  return skin.characters.map((character) => {
+    const { id, name } = character;
     const runFrames = (direction) =>
       Array.from({ length: 6 }, (__, frameIndex) => spriteSrcForSkin(skin, id, `run_${direction}_${String(frameIndex + 1).padStart(2, "0")}`));
     return {
       id,
-      name: skin.names[index],
+      name,
       src: spriteSrcForSkin(skin, id, "front"),
       dragSrc: spriteSrcForSkin(skin, id, "front"),
       left: runFrames("left"),
