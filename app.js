@@ -22,6 +22,8 @@ const splashIntro = document.getElementById("splashIntro");
 const splashEnter = document.getElementById("splashEnter");
 const splashProgress = document.getElementById("splashProgress");
 const splashText = document.getElementById("splashText");
+const skinPrevButtons = [...document.querySelectorAll("[data-skin-prev]")];
+const skinNextButtons = [...document.querySelectorAll("[data-skin-next]")];
 
 const ruleSlides = [
   { src: "./assets/rule_slide_01.png?v=20260720-rule-clean1", alt: "规则 1：听原声" },
@@ -59,8 +61,66 @@ const decodingClipPromises = new Map();
 let audioEngineUnlocked = false;
 
 const ASSET_VERSION = "20260720-run-timing1";
-const runFrames = (id, direction) =>
-  Array.from({ length: 6 }, (_, index) => `./assets/${id}_run_${direction}_${String(index + 1).padStart(2, "0")}.png?v=${ASSET_VERSION}`);
+const SKIN_ASSET_VERSION = "20260908-doll-v6";
+const SKIN_STORAGE_KEY = "liguo-listening-demo:skin";
+const skinOptions = [
+  {
+    id: "default",
+    root: "./assets",
+    version: ASSET_VERSION,
+    names: ["棕糖熊", "红结兔", "紫衣橙熊", "粉裙可可", "蓝结灰虎"],
+  },
+  {
+    id: "doll-v1",
+    root: "./assets/skins/doll-v1",
+    version: SKIN_ASSET_VERSION,
+    names: ["星麦金铃", "发卡栗栗", "粉桃夜帽", "蓝云团团", "蜜柚睡衣"],
+  },
+];
+
+function findSkinOption(id) {
+  return skinOptions.find((skin) => skin.id === id) || skinOptions[0];
+}
+
+function readStoredSkinId() {
+  try {
+    return localStorage.getItem(SKIN_STORAGE_KEY) || "";
+  } catch {
+    return "";
+  }
+}
+
+function writeStoredSkinId(id) {
+  try {
+    localStorage.setItem(SKIN_STORAGE_KEY, id);
+  } catch {
+    // Some embedded browsers disable localStorage; the skin still applies for this session.
+  }
+}
+
+const skinParam = new URLSearchParams(window.location.search).get("skin");
+let activeSkinId = findSkinOption(skinParam || readStoredSkinId()).id;
+
+function spriteSrcForSkin(skin, id, suffix) {
+  return `${skin.root}/${id}_${suffix}.png?v=${skin.version}`;
+}
+
+function buildMascots(skinId = activeSkinId) {
+  const skin = findSkinOption(skinId);
+  return Array.from({ length: 5 }, (_, index) => {
+    const id = `char${String(index + 1).padStart(2, "0")}`;
+    const runFrames = (direction) =>
+      Array.from({ length: 6 }, (__, frameIndex) => spriteSrcForSkin(skin, id, `run_${direction}_${String(frameIndex + 1).padStart(2, "0")}`));
+    return {
+      id,
+      name: skin.names[index],
+      src: spriteSrcForSkin(skin, id, "front"),
+      dragSrc: spriteSrcForSkin(skin, id, "front"),
+      left: runFrames("left"),
+      right: runFrames("right"),
+    };
+  });
+}
 
 const RUN_FRAME_MS = {
   char02: 155,
@@ -73,48 +133,53 @@ const RUN_SPEED_MULTIPLIER = {
   char05: 1.12,
 };
 
-const mascots = [
-  {
-    id: "char01",
-    name: "棕糖熊",
-    src: "./assets/char01_front.png",
-    dragSrc: "./assets/char01_front.png",
-    left: runFrames("char01", "left"),
-    right: runFrames("char01", "right"),
-  },
-  {
-    id: "char02",
-    name: "红结兔",
-    src: "./assets/char02_front.png",
-    dragSrc: "./assets/char02_front.png",
-    left: runFrames("char02", "left"),
-    right: runFrames("char02", "right"),
-  },
-  {
-    id: "char03",
-    name: "紫衣橙熊",
-    src: "./assets/char03_front.png",
-    dragSrc: "./assets/char03_front.png",
-    left: runFrames("char03", "left"),
-    right: runFrames("char03", "right"),
-  },
-  {
-    id: "char04",
-    name: "粉裙可可",
-    src: "./assets/char04_front.png",
-    dragSrc: "./assets/char04_front.png",
-    left: runFrames("char04", "left"),
-    right: runFrames("char04", "right"),
-  },
-  {
-    id: "char05",
-    name: "蓝结灰虎",
-    src: "./assets/char05_front.png",
-    dragSrc: "./assets/char05_front.png",
-    left: runFrames("char05", "left"),
-    right: runFrames("char05", "right"),
-  },
-];
+let mascots = buildMascots();
+
+function syncStaticMascotImages() {
+  document.body.dataset.skin = activeSkinId;
+  document.querySelectorAll(".screen-home .mascot-band img").forEach((img, index) => {
+    img.src = mascots[index % mascots.length].src;
+    img.alt = mascots[index % mascots.length].name;
+  });
+
+  document.querySelectorAll(".result-mascots img").forEach((img, index) => {
+    img.src = [mascots[0].src, mascots[3].src][index] || mascots[index % mascots.length].src;
+    img.alt = [mascots[0].name, mascots[3].name][index] || mascots[index % mascots.length].name;
+  });
+
+  document.querySelectorAll(".screen-share .mascot-band.small img").forEach((img, index) => {
+    img.src = [mascots[0].src, mascots[3].src][index] || mascots[index % mascots.length].src;
+    img.alt = [mascots[0].name, mascots[3].name][index] || mascots[index % mascots.length].name;
+  });
+
+  document.querySelectorAll(".share-preview-mascots img").forEach((img, index) => {
+    img.src = [mascots[1].src, mascots[2].src, mascots[4].src][index] || mascots[index % mascots.length].src;
+    img.alt = [mascots[1].name, mascots[2].name, mascots[4].name][index] || mascots[index % mascots.length].name;
+  });
+
+  document.querySelectorAll(".sad-mascot").forEach((img) => {
+    img.src = mascots[0].src;
+    img.alt = mascots[0].name;
+  });
+}
+
+function setActiveSkin(skinId, { persist = true } = {}) {
+  activeSkinId = findSkinOption(skinId).id;
+  mascots = buildMascots(activeSkinId);
+  if (persist) writeStoredSkinId(activeSkinId);
+  syncStaticMascotImages();
+  renderRank();
+  collectDeferredImageAssets().forEach((src) => {
+    if (src.includes("/char") || src.includes("/assets/skins/")) preloadImage(src);
+  });
+  saveSession(document.querySelector(".screen.active")?.dataset.screen || "home");
+}
+
+function cycleSkin(step) {
+  const currentIndex = skinOptions.findIndex((skin) => skin.id === activeSkinId);
+  const nextIndex = (currentIndex + step + skinOptions.length) % skinOptions.length;
+  setActiveSkin(skinOptions[nextIndex].id);
+}
 
 const songs = GameAudioConfig.songs;
 const clips = GameAudioConfig.clips || [];
@@ -179,6 +244,7 @@ function saveSession(activeScreen = document.querySelector(".screen.active")?.da
         mistakes: state.mistakes,
         revives: state.revives,
         hints: state.hints,
+        skinId: activeSkinId,
         currentSongId: state.currentSong?.id || songs[0]?.id,
         elapsedMs: state.startedAt ? Math.max(0, Date.now() - state.startedAt) : 0,
       }),
@@ -297,12 +363,12 @@ function preloadLevelAudio() {
   });
 }
 
-const rankRows = [
-  ["1", mascots[1].src, "红结兔", "5/5", "100%", "01:23", "0"],
-  ["2", mascots[2].src, "紫衣橙熊", "5/5", "96%", "01:35", "1"],
-  ["3", mascots[4].src, "蓝结灰虎", "5/5", "92%", "01:48", "0"],
-  ["4", mascots[3].src, "粉裙可可", "4/5", "88%", "01:52", "1"],
-  ["5", mascots[0].src, "棕糖熊", "4/5", "84%", "02:05", "2"],
+const rankSeeds = [
+  ["1", 1, "5/5", "100%", "01:23", "0"],
+  ["2", 2, "5/5", "96%", "01:35", "1"],
+  ["3", 4, "5/5", "92%", "01:48", "0"],
+  ["4", 3, "4/5", "88%", "01:52", "1"],
+  ["5", 0, "4/5", "84%", "02:05", "2"],
 ];
 
 function showScreen(name) {
@@ -757,12 +823,15 @@ function getRunSpeedMultiplier(mascotId) {
 }
 
 function bindRunnerFrames(button, mascot, direction, frameIndex = 0) {
+  const img = button.querySelector("img");
   button.dataset.direction = direction;
+  button.ariaLabel = `试听 ${mascot.name}`;
   button.frames = mascot[direction];
   button.frameIndex = frameIndex % button.frames.length;
   button.frameElapsed = 0;
   button.frameMs = getRunFrameMs(mascot.id);
-  button.querySelector("img").src = button.frames[button.frameIndex];
+  img.src = button.frames[button.frameIndex];
+  img.alt = mascot.name;
 }
 
 function advanceRunnerFrame(button, delta) {
@@ -979,7 +1048,10 @@ function revive() {
 function renderRank() {
   const ownScore = Math.max(state.score, 650);
   const rows = [
-    ...rankRows,
+    ...rankSeeds.map(([rank, mascotIndex, levels, rate, time, revive]) => {
+      const mascot = mascots[mascotIndex] || mascots[0];
+      return [rank, mascot.src, mascot.name, levels, rate, time, revive];
+    }),
     ["86", mascots[2].src, "我自己", `${Math.min(5, state.level + 1)}/5`, `${Math.max(68, 100 - state.mistakes * 8)}%`, elapsed(), String(state.revives)],
   ];
   rankList.innerHTML = rows
@@ -997,6 +1069,7 @@ function renderRank() {
 }
 
 function elapsed() {
+  if (!state.startedAt) return "00:00";
   const seconds = Math.max(1, Math.floor((Date.now() - state.startedAt) / 1000));
   const mm = String(Math.floor(seconds / 60)).padStart(2, "0");
   const ss = String(seconds % 60).padStart(2, "0");
@@ -1653,6 +1726,8 @@ document.querySelectorAll(".start-game").forEach((button) => button.addEventList
 document.querySelectorAll(".to-home:not(.hud-back)").forEach((button) => button.addEventListener("click", () => showScreen("home")));
 document.querySelectorAll(".open-rank").forEach((button) => button.addEventListener("click", () => showScreen("rank")));
 document.querySelectorAll(".open-share").forEach((button) => button.addEventListener("click", openShareScreen));
+skinPrevButtons.forEach((button) => button.addEventListener("click", () => cycleSkin(-1)));
+skinNextButtons.forEach((button) => button.addEventListener("click", () => cycleSkin(1)));
 document.querySelector(".share-return")?.addEventListener("click", returnFromShareScreen);
 document.querySelector(".home-share-top")?.addEventListener("click", openHomeShareModal);
 document.querySelector(".next-level").addEventListener("click", nextLevel);
@@ -1922,6 +1997,7 @@ function applyStoredSession() {
   const saved = readSession();
   if (!saved) return false;
 
+  if (saved.skinId && !skinParam) setActiveSkin(saved.skinId, { persist: true });
   dismissSplashImmediately();
   shareReturnScreen = saved.returnScreen && RESTORABLE_SCREENS.has(saved.returnScreen) && saved.returnScreen !== "share" ? saved.returnScreen : "home";
   state.level = Math.min(Math.max(Number(saved.level) || 0, 0), levelConfigs.length - 1);
@@ -1964,4 +2040,5 @@ function applyStoredSession() {
 }
 
 disableNativeImageInteractions();
+syncStaticMascotImages();
 if (!applyPreviewRoute() && !applyStoredSession()) initSplashIntro();

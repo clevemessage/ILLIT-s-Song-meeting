@@ -397,6 +397,71 @@ body.splash-active:not(.splash-entering) .app-shell {
   translate: 0 -47px;
 }
 
+.skin-selector {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: min(352px, 92%);
+  margin: auto auto 8px;
+  translate: 0 -47px;
+}
+
+.skin-selector .mascot-band {
+  flex: 1;
+  margin: 0;
+  translate: 0;
+}
+
+.skin-arrow {
+  position: absolute;
+  top: 50%;
+  z-index: 4;
+  flex: 0 0 auto;
+  width: 34px;
+  height: 42px;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.92);
+  border-radius: 999px;
+  background: rgba(255, 247, 255, 0.88);
+  box-shadow: 0 4px 0 rgba(188, 140, 222, 0.48), 0 8px 15px rgba(86, 50, 118, 0.18);
+  cursor: pointer;
+  transform: translateY(-50%);
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+.skin-arrow--prev {
+  left: -6px;
+}
+
+.skin-arrow--next {
+  right: -6px;
+}
+
+.skin-arrow::before {
+  content: "";
+  display: block;
+  width: 10px;
+  height: 10px;
+  margin: 0 auto;
+  border-top: 3px solid #9b6bc8;
+  border-left: 3px solid #9b6bc8;
+}
+
+.skin-arrow--prev::before {
+  transform: translateX(2px) rotate(-45deg);
+}
+
+.skin-arrow--next::before {
+  transform: translateX(-2px) rotate(135deg);
+}
+
+.skin-arrow:active {
+  transform: translateY(calc(-50% + 2px)) scale(0.96);
+  filter: brightness(1.04);
+}
+
 .mascot-band img {
   width: 68px;
   height: auto;
@@ -1659,6 +1724,22 @@ body.splash-active:not(.splash-entering) .app-shell {
     translate: 0 clamp(-47px, -12cqw, -39px);
   }
 
+  .skin-selector {
+    width: min(92cqw, 352px);
+    margin-bottom: clamp(7px, 2.6cqw, 10px);
+    translate: 0 clamp(-47px, -12cqw, -39px);
+  }
+
+  .skin-selector .mascot-band {
+    min-height: clamp(112px, 33.3cqw, 130px);
+    translate: 0;
+  }
+
+  .skin-arrow {
+    width: clamp(28px, 8.7cqw, 34px);
+    height: clamp(36px, 10.8cqw, 42px);
+  }
+
   .mascot-band img {
     width: clamp(56px, 17.4cqw, 68px);
   }
@@ -1877,6 +1958,15 @@ body.splash-active:not(.splash-entering) .app-shell {
 
   .screen-home .mascot-band {
     translate: 0 -39px;
+  }
+
+  .skin-selector {
+    translate: 0 -39px;
+  }
+
+  .skin-selector .mascot-band {
+    min-height: clamp(96px, 29cqw, 112px);
+    translate: 0;
   }
 
   .home-image-button {

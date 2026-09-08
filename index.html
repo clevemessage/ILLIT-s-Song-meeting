@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>礼国猜歌会 Demo</title>
-    <link rel="stylesheet" href="./styles.css?v=20260908-audio1" />
+    <link rel="stylesheet" href="./styles.css?v=20260908-skin1" />
   </head>
   <body class="splash-active">
     <div class="splash-intro" id="splashIntro" aria-live="polite">
@@ -48,12 +48,16 @@
           <div class="home-brand">
             <img class="home-title-img" src="./assets/home_title_illit.png?v=20260720-mainlogo1" alt="Illit's song meeting" />
           </div>
-          <div class="mascot-band" aria-hidden="true">
-            <img src="./assets/char01_front.png" alt="" />
-            <img src="./assets/char02_front.png" alt="" />
-            <img src="./assets/char03_front.png" alt="" />
-            <img src="./assets/char04_front.png" alt="" />
-            <img src="./assets/char05_front.png" alt="" />
+          <div class="skin-selector">
+            <button class="skin-arrow skin-arrow--prev" type="button" data-skin-prev aria-label="上一套皮肤"></button>
+            <div class="mascot-band" aria-hidden="true">
+              <img src="./assets/char01_front.png" alt="" />
+              <img src="./assets/char02_front.png" alt="" />
+              <img src="./assets/char03_front.png" alt="" />
+              <img src="./assets/char04_front.png" alt="" />
+              <img src="./assets/char05_front.png" alt="" />
+            </div>
+            <button class="skin-arrow skin-arrow--next" type="button" data-skin-next aria-label="下一套皮肤"></button>
           </div>
           <button class="home-image-button start-game" type="button" aria-label="开始挑战">
             <img src="./assets/home_btn_start.png" alt="" />
@@ -264,8 +268,8 @@
 
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-    <script src="./game-utils.js?v=20260908-audio1"></script>
-    <script src="./audio-config.js?v=20260908-audio1"></script>
-    <script src="./app.js?v=20260908-audio1"></script>
+    <script src="./game-utils.js?v=20260908-skin1"></script>
+    <script src="./audio-config.js?v=20260908-skin1"></script>
+    <script src="./app.js?v=20260908-skin1"></script>
   </body>
 </html>
