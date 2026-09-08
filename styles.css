@@ -414,6 +414,10 @@ body.splash-active:not(.splash-entering) .app-shell {
   translate: 0;
 }
 
+.skin-selector.is-switching .mascot-band {
+  opacity: 0.72;
+}
+
 .skin-arrow {
   position: absolute;
   top: 50%;
@@ -429,7 +433,7 @@ body.splash-active:not(.splash-entering) .app-shell {
   cursor: pointer;
   transform: translateY(calc(-50% + 25px));
   filter: drop-shadow(0 2px 3px rgba(174, 103, 160, 0.14));
-  transition: transform 0.15s ease, filter 0.15s ease;
+  transition: transform 0.15s ease, filter 0.15s ease, opacity 0.15s ease;
 }
 
 @supports ((-webkit-backdrop-filter: blur(2px)) or (backdrop-filter: blur(2px))) {
@@ -468,6 +472,10 @@ body.splash-active:not(.splash-entering) .app-shell {
 .skin-arrow:active {
   transform: translateY(calc(-50% + 27px)) scale(0.96);
   filter: drop-shadow(0 1px 2px rgba(174, 103, 160, 0.12)) brightness(1.04);
+}
+
+.skin-arrow:disabled {
+  opacity: 0.48;
 }
 
 .mascot-band img {
@@ -1766,6 +1774,19 @@ body[data-skin="doll-v1"] .share-mascot-btn img {
   .skin-arrow {
     width: clamp(24px, 7.2cqw, 28px);
     height: clamp(24px, 7.2cqw, 28px);
+    transform: translateY(calc(-50% + 9px));
+  }
+
+  .skin-arrow--prev {
+    left: clamp(2px, 1.8cqw, 7px);
+  }
+
+  .skin-arrow--next {
+    right: clamp(2px, 1.8cqw, 7px);
+  }
+
+  .skin-arrow:active {
+    transform: translateY(calc(-50% + 11px)) scale(0.96);
   }
 
   .mascot-band img {

@@ -24,6 +24,7 @@ const splashProgress = document.getElementById("splashProgress");
 const splashText = document.getElementById("splashText");
 const skinPrevButtons = [...document.querySelectorAll("[data-skin-prev]")];
 const skinNextButtons = [...document.querySelectorAll("[data-skin-next]")];
+const skinSelector = document.querySelector(".skin-selector");
 
 const ruleSlides = [
   { src: "./assets/rule_slide_01.png?v=20260720-rule-clean1", alt: "规则 1：听原声" },
@@ -46,7 +47,7 @@ Object.values(uiAudio).forEach((audio) => {
   audio.setAttribute?.("playsinline", "");
 });
 const HOME_BGM_VOLUME = 0.58;
-const GAME_BGM_VOLUME = 0.24;
+const GAME_BGM_VOLUME = 0.15;
 
 uiAudio.bgm.volume = HOME_BGM_VOLUME;
 uiAudio.button.volume = 0.42;
@@ -134,6 +135,14 @@ function buildMascots(skinId = activeSkinId) {
   });
 }
 
+function getSkinFrontSources(skinId) {
+  return buildMascots(skinId).map((mascot) => mascot.src);
+}
+
+function preloadSkinPreview(skinId) {
+  return Promise.allSettled(getSkinFrontSources(skinId).map(preloadImage));
+}
+
 const RUN_FRAME_MS = {
   char02: 155,
   char04: 165,
@@ -187,10 +196,25 @@ function setActiveSkin(skinId, { persist = true } = {}) {
   saveSession(document.querySelector(".screen.active")?.dataset.screen || "home");
 }
 
-function cycleSkin(step) {
+let skinSwitchToken = 0;
+async function cycleSkin(step) {
   const currentIndex = skinOptions.findIndex((skin) => skin.id === activeSkinId);
   const nextIndex = (currentIndex + step + skinOptions.length) % skinOptions.length;
-  setActiveSkin(skinOptions[nextIndex].id);
+  const nextSkinId = skinOptions[nextIndex].id;
+  const token = ++skinSwitchToken;
+
+  skinSelector?.classList.add("is-switching");
+  [...skinPrevButtons, ...skinNextButtons].forEach((button) => {
+    button.disabled = true;
+  });
+  await preloadSkinPreview(nextSkinId);
+  if (token === skinSwitchToken) setActiveSkin(nextSkinId);
+  if (token === skinSwitchToken) {
+    skinSelector?.classList.remove("is-switching");
+    [...skinPrevButtons, ...skinNextButtons].forEach((button) => {
+      button.disabled = false;
+    });
+  }
 }
 
 const songs = GameAudioConfig.songs;
