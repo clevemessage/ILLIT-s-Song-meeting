@@ -34,22 +34,25 @@ const ruleSlides = [
 
 const uiAudio = {
   button: new Audio("./assets/audio/ui/button.wav"),
-  bgm: new Audio("./assets/audio/ui/bgm.mp3"),
+  homeBgm: new Audio("./assets/audio/ui/home_bgm.mp3"),
+  gameBgm: new Audio("./assets/audio/ui/bgm.mp3"),
   success: new Audio("./assets/audio/ui/success.mp3"),
   wrong: new Audio("./assets/audio/ui/wrong.mp3"),
   fail: new Audio("./assets/audio/ui/fail_wonhee.mp3"),
   failExtra: new Audio("./assets/audio/ui/fail_extra.mp3"),
 };
-uiAudio.bgm.loop = true;
+uiAudio.homeBgm.loop = true;
+uiAudio.gameBgm.loop = true;
 Object.values(uiAudio).forEach((audio) => {
   audio.preload = "auto";
   audio.playsInline = true;
   audio.setAttribute?.("playsinline", "");
 });
 const HOME_BGM_VOLUME = 0.58;
-const GAME_BGM_VOLUME = 0.09;
+const GAME_BGM_VOLUME = 0.035;
 
-uiAudio.bgm.volume = HOME_BGM_VOLUME;
+uiAudio.homeBgm.volume = HOME_BGM_VOLUME;
+uiAudio.gameBgm.volume = GAME_BGM_VOLUME;
 uiAudio.button.volume = 0.42;
 uiAudio.success.volume = 0.86;
 uiAudio.wrong.volume = 0.9;
@@ -458,6 +461,7 @@ function setGamePaused(paused, { toast = true } = {}) {
 
 function startGame() {
   resetPauseState();
+  stopUiAudio(uiAudio.gameBgm);
   if (state.pendingFailTimer) clearTimeout(state.pendingFailTimer);
   if (state.reviveTimer) clearInterval(state.reviveTimer);
   state.pendingFailTimer = 0;
@@ -1181,16 +1185,21 @@ function stopUiAudio(audio, reset = true) {
   if (reset) audio.currentTime = 0;
 }
 
-function startHomeBgm(volume = HOME_BGM_VOLUME) {
-  if (!uiAudio.bgm || !uiAudio.bgm.paused) return;
-  uiAudio.bgm.volume = volume;
+function startLoopingBgm(audio, volume, { restart = false } = {}) {
+  if (!audio) return;
+  if (!restart && !audio.paused) return;
+  if (restart) {
+    audio.pause();
+    audio.currentTime = 0;
+  }
+  audio.volume = volume;
   if (document.hidden) {
     homeBgmPending = true;
     setHomeBgmState("pending");
     return;
   }
   setHomeBgmState("starting");
-  const playback = playUiAudio(uiAudio.bgm, { restart: false, catchErrors: false });
+  const playback = playUiAudio(audio, { restart: false, catchErrors: false });
   if (playback && typeof playback.then === "function") {
     playback
       .then(() => {
@@ -1207,22 +1216,28 @@ function startHomeBgm(volume = HOME_BGM_VOLUME) {
   }
 }
 
+function startHomeBgm({ restart = false } = {}) {
+  stopUiAudio(uiAudio.gameBgm);
+  startLoopingBgm(uiAudio.homeBgm, HOME_BGM_VOLUME, { restart });
+}
+
 function startGameBgm() {
-  if (!uiAudio.bgm) return;
-  uiAudio.bgm.volume = GAME_BGM_VOLUME;
-  startHomeBgm(GAME_BGM_VOLUME);
+  stopUiAudio(uiAudio.homeBgm);
+  startLoopingBgm(uiAudio.gameBgm, GAME_BGM_VOLUME);
 }
 
 function stopHomeBgm(reset = true) {
   homeBgmPending = false;
   setHomeBgmState("stopped");
-  stopUiAudio(uiAudio.bgm, reset);
+  stopUiAudio(uiAudio.homeBgm, reset);
+  stopUiAudio(uiAudio.gameBgm, reset);
 }
 
 function unlockHomeBgm() {
+  if (document.body.classList.contains("splash-active") && !document.body.classList.contains("splash-entering")) return;
   const activeScreen = document.querySelector(".screen.active")?.dataset.screen;
-  if (activeScreen === "game" && (homeBgmPending || uiAudio.bgm?.paused)) startGameBgm();
-  else if (activeScreen === "home" && (homeBgmPending || uiAudio.bgm?.paused)) startHomeBgm();
+  if (activeScreen === "game" && (homeBgmPending || uiAudio.gameBgm?.paused)) startGameBgm();
+  else if (activeScreen === "home" && (homeBgmPending || uiAudio.homeBgm?.paused)) startHomeBgm();
 }
 
 function playButtonClickSfx() {
@@ -1522,11 +1537,13 @@ function playWrong({ fatal = false } = {}) {
   stopUiAudio(uiAudio.failExtra);
   if (fatal) {
     stopHomeBgm();
-    const primaryPlayback = playUiAudio(uiAudio.fail, { catchErrors: false });
-    const extraPlayback = playUiAudio(uiAudio.failExtra, { catchErrors: false });
     const fallback = () => playWrongSynth();
-    if (primaryPlayback && typeof primaryPlayback.catch === "function") primaryPlayback.catch(fallback);
-    else if (!primaryPlayback && !extraPlayback) fallback();
+    const extraPlayback = playUiAudio(uiAudio.failExtra, { catchErrors: false });
+    window.setTimeout(() => {
+      const voicePlayback = playUiAudio(uiAudio.fail, { catchErrors: false });
+      if (voicePlayback && typeof voicePlayback.catch === "function") voicePlayback.catch(fallback);
+      else if (!voicePlayback && !extraPlayback) fallback();
+    }, 90);
     if (extraPlayback && typeof extraPlayback.catch === "function") extraPlayback.catch(() => {});
     return;
   }
@@ -1763,9 +1780,7 @@ function enterFromSplash() {
 }
 
 async function initSplashIntro() {
-  startHomeBgm();
   if (!splashIntro || !splashEnter || !splashText) {
-    startHomeBgm();
     return;
   }
   const imageReady = Promise.allSettled(collectSplashImageAssets().map(preloadImage));

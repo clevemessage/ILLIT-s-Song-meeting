@@ -161,7 +161,7 @@ body.splash-active:not(.splash-entering) .app-shell {
   height: 100%;
   overflow: hidden;
   clip-path: inset(0 100% 0 0);
-  animation: splashProgressMove 2.8s ease-in-out 2 forwards;
+  animation: splashProgressMove 2.8s ease-in-out 1 forwards;
 }
 
 .splash-intro.is-ready .splash-progress {
