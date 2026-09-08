@@ -419,16 +419,24 @@ body.splash-active:not(.splash-entering) .app-shell {
   top: 50%;
   z-index: 4;
   flex: 0 0 auto;
-  width: 34px;
-  height: 42px;
+  width: 28px;
+  height: 28px;
   padding: 0;
-  border: 1px solid rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.82);
   border-radius: 999px;
-  background: rgba(255, 247, 255, 0.88);
-  box-shadow: 0 4px 0 rgba(188, 140, 222, 0.48), 0 8px 15px rgba(86, 50, 118, 0.18);
+  background: rgba(255, 221, 240, 0.58);
+  box-shadow: 0 3px 0 rgba(208, 116, 176, 0.26), 0 6px 10px rgba(122, 62, 118, 0.14);
   cursor: pointer;
-  transform: translateY(-50%);
+  transform: translateY(calc(-50% + 25px));
+  filter: drop-shadow(0 2px 3px rgba(86, 50, 118, 0.16));
   transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+@supports ((-webkit-backdrop-filter: blur(2px)) or (backdrop-filter: blur(2px))) {
+  .skin-arrow {
+    -webkit-backdrop-filter: blur(2px);
+    backdrop-filter: blur(2px);
+  }
 }
 
 .skin-arrow--prev {
@@ -442,11 +450,11 @@ body.splash-active:not(.splash-entering) .app-shell {
 .skin-arrow::before {
   content: "";
   display: block;
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
   margin: 0 auto;
-  border-top: 3px solid #9b6bc8;
-  border-left: 3px solid #9b6bc8;
+  border-top: 3px solid rgba(207, 70, 145, 0.92);
+  border-left: 3px solid rgba(207, 70, 145, 0.92);
 }
 
 .skin-arrow--prev::before {
@@ -458,8 +466,8 @@ body.splash-active:not(.splash-entering) .app-shell {
 }
 
 .skin-arrow:active {
-  transform: translateY(calc(-50% + 2px)) scale(0.96);
-  filter: brightness(1.04);
+  transform: translateY(calc(-50% + 27px)) scale(0.96);
+  filter: drop-shadow(0 1px 2px rgba(86, 50, 118, 0.16)) brightness(1.04);
 }
 
 .mascot-band img {
@@ -471,6 +479,33 @@ body.splash-active:not(.splash-entering) .app-shell {
 
 .mascot-band img:nth-child(2n) {
   animation-delay: -0.7s;
+}
+
+body[data-skin="doll-v1"] .mascot-band img {
+  width: 75px;
+}
+
+body[data-skin="doll-v1"] .pet-card {
+  width: 64px;
+  height: 77px;
+}
+
+body[data-skin="doll-v1"] .result-mascots img {
+  width: 79px;
+}
+
+body[data-skin="doll-v1"] .sad-mascot {
+  width: 123px;
+}
+
+body[data-skin="doll-v1"] .rank-list img {
+  width: 46px;
+  height: 46px;
+}
+
+body[data-skin="doll-v1"] .share-mascot-btn,
+body[data-skin="doll-v1"] .share-mascot-btn img {
+  width: clamp(53px, 16.7cqw, 64px);
 }
 
 .home-image-button {
@@ -1736,12 +1771,16 @@ body.splash-active:not(.splash-entering) .app-shell {
   }
 
   .skin-arrow {
-    width: clamp(28px, 8.7cqw, 34px);
-    height: clamp(36px, 10.8cqw, 42px);
+    width: clamp(24px, 7.2cqw, 28px);
+    height: clamp(24px, 7.2cqw, 28px);
   }
 
   .mascot-band img {
     width: clamp(56px, 17.4cqw, 68px);
+  }
+
+  body[data-skin="doll-v1"] .mascot-band img {
+    width: clamp(62px, 19.1cqw, 75px);
   }
 
   .home-image-button,
@@ -1815,6 +1854,11 @@ body.splash-active:not(.splash-entering) .app-shell {
     height: clamp(60px, 17.9cqw, 70px);
   }
 
+  body[data-skin="doll-v1"] .pet-card {
+    width: clamp(55px, 16.4cqw, 64px);
+    height: clamp(66px, 19.7cqw, 77px);
+  }
+
   .target-zone {
     grid-template-columns: clamp(78px, 24.6cqw, 96px) minmax(0, 1fr);
     gap: clamp(6px, 2.1cqw, 8px);
@@ -1882,6 +1926,10 @@ body.splash-active:not(.splash-entering) .app-shell {
     width: clamp(58px, 18.5cqw, 72px);
   }
 
+  body[data-skin="doll-v1"] .result-mascots img {
+    width: clamp(64px, 20.4cqw, 79px);
+  }
+
   .rank-panel,
   .fail-panel,
   .share-card {
@@ -1906,6 +1954,11 @@ body.splash-active:not(.splash-entering) .app-shell {
   .rank-list img {
     width: clamp(36px, 10.8cqw, 42px);
     height: clamp(36px, 10.8cqw, 42px);
+  }
+
+  body[data-skin="doll-v1"] .rank-list img {
+    width: clamp(40px, 11.9cqw, 46px);
+    height: clamp(40px, 11.9cqw, 46px);
   }
 
   .rank-list small {
